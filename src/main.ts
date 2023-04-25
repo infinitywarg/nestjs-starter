@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { VersioningType } from '@nestjs/common';
+import { Logger, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
@@ -10,6 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],
   });
+  const logger = new Logger('Bootstrap');
 
   // global /api prefix for every endpoint
   app.setGlobalPrefix('/api');
@@ -18,6 +19,7 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
+  logger.log(`Global /api prefix and versioning enabled`);
 
   // Config service to inject .env variables globally
   const appConfig: ConfigService = app.get(ConfigService);
@@ -32,6 +34,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, documentOptions);
   SwaggerModule.setup('docs', app, document);
+  logger.log(`Swagger docs initialized on /docs`);
 
   // cross origin security, customize options as per requirement
   app.enableCors({
@@ -39,6 +42,7 @@ async function bootstrap() {
     methods: 'GET, PUT, POST, DELETE',
     allowedHeaders: 'Content-Type, Authorization',
   });
+  logger.log(`CORS protection enabled`);
 
   // http header security
   // defaults:
@@ -48,8 +52,11 @@ async function bootstrap() {
   // X-Content-Type-Options: defines that the MIME types used in the Content-Type header must be followed. This mitigates MIME type sniffing, which can lead to XSS attacks and cause other vulnerabilities.
   // X-Frame-Options: deny iframes
   app.use(helmet());
+  logger.log(`HTTP headers protection enabled`);
 
   await app.listen(port);
+
+  logger.log(`Server started on port ${port}`);
 }
 
 bootstrap();
