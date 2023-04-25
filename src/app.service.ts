@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -10,6 +10,7 @@ export class AppService {
   }
 
   getHealth(): any {
+    Logger.log(`AppService: executing health check api for ${this.myName}`);
     return { health: 'ok', name: this.myName };
   }
 }
