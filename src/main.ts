@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 
@@ -18,14 +19,18 @@ async function bootstrap() {
     type: VersioningType.URI,
   });
 
+  // Config service to inject .env variables globally
+  const appConfig: ConfigService = app.get(ConfigService);
+  const port: number = appConfig.getOrThrow<number>('PORT');
+
   // swagger openAPI 3.0 documentation builder
-  const config = new DocumentBuilder()
+  const documentOptions = new DocumentBuilder()
     .setTitle('NestJS Starter Kit')
     .setDescription('Boilerplate template to start NestJS API project')
     .setVersion('1.0.0')
     .addTag('API Documentation')
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, documentOptions);
   SwaggerModule.setup('docs', app, document);
 
   // cross origin security, customize options as per requirement
@@ -44,8 +49,7 @@ async function bootstrap() {
   // X-Frame-Options: deny iframes
   app.use(helmet());
 
-  // start the app at port 3000
-  await app.listen(3000);
+  await app.listen(port);
 }
 
 bootstrap();
