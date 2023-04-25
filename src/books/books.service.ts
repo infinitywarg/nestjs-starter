@@ -1,11 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 
 @Injectable()
 export class BooksService {
+  private readonly logger = new Logger('BooksService');
+
   create(createBookDto: CreateBookDto) {
-    return 'This action adds a new book';
+    try {
+      this.logger.log('returning all books');
+      return 'This action adds a new book';
+    } catch (error) {
+      this.logger.error(error);
+      throw new Error(error);
+    }
   }
 
   findAll() {
